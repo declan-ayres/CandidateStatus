@@ -1,4 +1,3 @@
-
 import java.net.URL;
 import java.util.List;
 import java.util.Properties;
@@ -29,6 +28,11 @@ import com.bullhorn.apiservice.result.ApiStartSessionResult;
 import com.bullhorn.entity.candidate.CandidateDto;
 import com.bullhorn.entity.user.CorporateUserDto;
 
+/**
+ * 
+ * @author declan.ayres
+ *
+ */
 public class CandidateChanges {
 	private static final QName SERVICE_NAME = new QName(
 			"http://apiservice.bullhorn.com/", "ApiService");
