@@ -129,6 +129,7 @@ public class CandidateChanges {
 			session = candidateResults.getSession();
 			candidate = (CandidateDto) candidateResults.getDto();
 
+			//Special case for candidate 5665 because of invalid character
 			if (qResult2.getIds().get(index).equals(5665)) {
 
 				history = apiService.getEditHistoryByDates(session,
