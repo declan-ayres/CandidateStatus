@@ -43,6 +43,9 @@ public class CandidateChanges {
 	private static Properties properties = new Properties();
 
 	public static void main(String[] args) throws Exception {
+		
+		properties.load(CandidateChanges.class.getResourceAsStream("/bullhorn.properties"));
+
 
 		final URL serviceUrl = new URL(
 				ApiService_Service.class.getResource("."), WSDL_URL);
@@ -199,7 +202,7 @@ public class CandidateChanges {
 										+ " "
 										+ "<span style=font-size:13px;>"
 										+ "<b>"
-										+ "Rating"
+										+ properties.getProperty("field") //candidate field that was changed
 										+ "</b>"
 										+ "</span>"
 										+ ": Changed from"
@@ -247,7 +250,7 @@ public class CandidateChanges {
 										+ " "
 										+ "<span style=font-size:13px;>"
 										+ "<b>"
-										+ "Rating"
+										+ properties.getProperty("field") //the candidate field that was changed
 										+ "</b>"
 										+ "</span>"
 										+ ": Changed from"
@@ -305,7 +308,6 @@ public class CandidateChanges {
 
 		}
 
-		properties.load(CandidateChanges.class.getResourceAsStream("/bullhorn.properties"));
 		
 		// send email
 		try {
