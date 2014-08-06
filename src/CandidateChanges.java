@@ -40,6 +40,7 @@ public class CandidateChanges {
 	private static final String API_USER = "314e.API";
 	private static final String API_PASSWD = "314e.com";
 	private static final String API_KEY = "F5EA5835-9A07-81A4-448468FE85A30556";
+	private static Properties properties = new Properties();
 
 	public static void main(String[] args) throws Exception {
 
@@ -122,7 +123,7 @@ public class CandidateChanges {
 		List<ApiEditHistory> histObjects;
 
 		// go through candidates
-		search: for (int index = 0; index < qResult2.getIds().size(); index++) {
+		search: for (int index = 200; index < qResult2.getIds().size(); index++) {
 
 			candidateResults = apiService.find(session, "Candidate", qResult2
 					.getIds().get(index));
@@ -304,13 +305,15 @@ public class CandidateChanges {
 
 		}
 
+		properties.load(CandidateChanges.class.getResourceAsStream("/bullhorn.properties"));
+		
 		// send email
 		try {
 
 			Message message = new MimeMessage(mailSession);
 			message.setFrom(new InternetAddress(username));
 			message.setRecipients(Message.RecipientType.TO,
-					InternetAddress.parse("declan.ayres@314ecorp.com"));
+					InternetAddress.parse(properties.getProperty("recipient")));
 			message.setSubject("Rating Changes");
 			message.setText(compiledChanges);
 			message.setContent(compiledChanges, "text/html; charset=utf-8");

@@ -5,7 +5,9 @@ import java.net.URL;
 
 
 
+
 import javax.xml.namespace.QName;
+
 
 
 
@@ -25,8 +27,10 @@ import com.bullhorn.apiservice.struct.EntityNameIdPair;
 
 
 
+
 import org.joda.time.DateTime;
 
+import java.util.Properties;
 import java.util.logging.*;
 
 
@@ -43,6 +47,7 @@ public class WeeklyNoteUpdate {
 	
 	
 	public static void main(String[] args) throws Exception {
+		
 		
 		final URL serviceUrl = new URL(ApiService_Service.class.getResource("."), WSDL_URL);
 		
