@@ -126,7 +126,7 @@ public class CandidateChanges {
 		List<ApiEditHistory> histObjects;
 
 		// go through candidates
-		search: for (int index = 200; index < qResult2.getIds().size(); index++) {
+		search: for (int index = 0; index < qResult2.getIds().size(); index++) {
 
 			candidateResults = apiService.find(session, "Candidate", qResult2
 					.getIds().get(index));
