@@ -314,7 +314,7 @@ public class CandidateChanges {
 			message.setFrom(new InternetAddress(username));
 			message.setRecipients(Message.RecipientType.TO,
 					InternetAddress.parse(properties.getProperty("recipient")));
-			message.setSubject("Rating Changes");
+			message.setSubject(properties.getProperty("subject"));
 			message.setText(compiledChanges);
 			message.setContent(compiledChanges, "text/html; charset=utf-8");
 
