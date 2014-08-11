@@ -188,7 +188,7 @@ public class CandidateChanges {
 
 						date = new DateTime(year, month, day, hour, minute, 0);
 
-						if (date.isAfter(currDate.minusDays(10).getMillis())) {
+						if (date.isAfter(currDate.minusDays(17).getMillis())) {
 
 							ApiFindResult userResult = apiService.find(session,
 									"CorporateUser", histObjects.get(i)
@@ -292,7 +292,8 @@ public class CandidateChanges {
 									+ (index + 1));
 							System.out.println(temp);
 							System.out.println(compiledChanges);
-
+							
+							compiledChanges += "<br>";
 						}
 
 						System.out.println("\n\n\n\n\n");
@@ -303,7 +304,7 @@ public class CandidateChanges {
 
 			}
 
-			compiledChanges += "<br>";
+			
 			System.out.println((index + 1));
 
 		}
