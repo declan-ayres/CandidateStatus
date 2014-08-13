@@ -55,7 +55,7 @@ public class CandidateChanges {
 		
 		
 		List<String> candidateids = null;
-		final Path candidatefile = FileSystems.getDefault().getPath("candidates.list");
+		final Path candidatefile = FileSystems.getDefault().getPath("candidate.list");
 		if (Files.exists(candidatefile)) {
 			candidateids = Files.readAllLines(candidatefile);
 		} else {

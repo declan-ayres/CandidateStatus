@@ -36,7 +36,7 @@ public class WeeklyNoteUpdate {
 	public static void main(String[] args) {
 	try {
 		List<String> noteids = null;
-		final Path noteFile = FileSystems.getDefault().getPath("candidates.list");
+		final Path noteFile = FileSystems.getDefault().getPath("candidate.list");
 		if (Files.exists(noteFile)) {
 			noteids = Files.readAllLines(noteFile);
 		} else {
