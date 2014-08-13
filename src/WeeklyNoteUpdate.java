@@ -1,4 +1,12 @@
+import java.io.BufferedWriter;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.namespace.QName;
 
@@ -25,7 +33,15 @@ public class WeeklyNoteUpdate {
 	private static final String API_PASSWD = "314e.com";
 	private static final String API_KEY = "F5EA5835-9A07-81A4-448468FE85A30556";
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
+	try {
+		List<String> noteids = null;
+		final Path noteFile = FileSystems.getDefault().getPath("candidates.list");
+		if (Files.exists(noteFile)) {
+			noteids = Files.readAllLines(noteFile);
+		} else {
+			noteids = new ArrayList<>();
+		}
 
 		final URL serviceUrl = new URL(
 				ApiService_Service.class.getResource("."), WSDL_URL);
@@ -77,7 +93,8 @@ public class WeeklyNoteUpdate {
 		ApiQueryResult candConf = apiService.query(session, query1);
 
 		ApiSaveResult updated;
-
+		
+		final BufferedWriter writer = Files.newBufferedWriter(noteFile, Charset.forName("US-ASCII"), StandardOpenOption.CREATE);
 		// Run through the notes
 		for (int index = 0; index < qResult.getIds().size(); index++) {
 
@@ -94,6 +111,10 @@ public class WeeklyNoteUpdate {
 
 			System.out.println(noteId + " " + (index + 1));
 			System.out.println(weeklyNote.getDateAdded());
+			
+			if (noteids.contains(String.valueOf(noteId))) {
+				continue;
+			}
 
 			// Go through the references of each note
 			for (EntityNameIdPair pair : reference.getEntityList()) {
@@ -109,6 +130,8 @@ public class WeeklyNoteUpdate {
 
 				if (candConf.getIds().size() == 1
 						&& pair.getEntityName().equals("Person")) {
+					
+					System.out.println(noteids);
 
 					System.out.println(pair.getEntityId().toString() + " "
 							+ pair.getEntityName().toString());
@@ -124,13 +147,26 @@ public class WeeklyNoteUpdate {
 
 					updated = apiService.save(session, candidate);
 					session = updated.getSession();
+					
+					
 
 				}
 
 			}
 
 			System.out.println(" ");
+			writer.write(String.valueOf(noteId));
+			writer.newLine();
+			writer.flush();
+			
 		}
+		
+		writer.close();
+		//Delete the file candidate.list
+		Files.deleteIfExists(noteFile);
+	}catch (final Exception ex) {
+		System.exit(10);
+	}
 
 	}
 

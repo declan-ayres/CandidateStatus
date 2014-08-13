@@ -1,4 +1,11 @@
+import java.io.BufferedWriter;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -42,7 +49,18 @@ public class CandidateChanges {
 	private static final String API_KEY = "F5EA5835-9A07-81A4-448468FE85A30556";
 	private static Properties properties = new Properties();
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
+		try {
+		
+		
+		
+		List<String> candidateids = null;
+		final Path candidatefile = FileSystems.getDefault().getPath("candidates.list");
+		if (Files.exists(candidatefile)) {
+			candidateids = Files.readAllLines(candidatefile);
+		} else {
+			candidateids = new ArrayList<>();
+		}
 		
 		properties.load(CandidateChanges.class.getResourceAsStream("/bullhorn.properties"));
 
@@ -124,6 +142,9 @@ public class CandidateChanges {
 
 		ApiGetEditHistoryResult history;
 		List<ApiEditHistory> histObjects;
+		
+		final BufferedWriter writer = Files.newBufferedWriter(candidatefile, Charset.forName("US-ASCII"),
+				StandardOpenOption.CREATE);
 
 		// go through candidates
 		search: for (int index = 0; index < qResult2.getIds().size(); index++) {
@@ -132,6 +153,10 @@ public class CandidateChanges {
 					.getIds().get(index));
 			session = candidateResults.getSession();
 			candidate = (CandidateDto) candidateResults.getDto();
+			
+			if (candidateids.contains(qResult2.getIds().get(index).toString())) {
+				continue;
+			}
 
 			//Special case for candidate 5665 because of invalid character
 			if (qResult2.getIds().get(index).equals(5665)) {
@@ -306,8 +331,15 @@ public class CandidateChanges {
 
 			
 			System.out.println((index + 1));
+			writer.write(qResult2.getIds().get(index).toString());
+			writer.newLine();
+			writer.flush();
 
 		}
+		
+		writer.close();
+		// Delete the file candidate.list
+		Files.deleteIfExists(candidatefile);
 
 		
 		// send email
@@ -327,6 +359,10 @@ public class CandidateChanges {
 
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);
+		}
+		
+		} catch (final Exception ex) {
+			System.exit(10);
 		}
 
 	}
