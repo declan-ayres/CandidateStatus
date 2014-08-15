@@ -27,6 +27,7 @@ import com.bullhorn.apiservice.query.DtoQuery;
 import com.bullhorn.apiservice.result.ApiFindResult;
 import com.bullhorn.apiservice.result.ApiGetAssociationIdsResult;
 import com.bullhorn.apiservice.result.ApiGetEditHistoryResult;
+import com.bullhorn.apiservice.result.ApiGetEntityNotesResult;
 import com.bullhorn.apiservice.result.ApiQueryResult;
 import com.bullhorn.apiservice.result.ApiStartSessionResult;
 import com.bullhorn.entity.appointment.AppointmentDto;
@@ -67,6 +68,7 @@ public class JobsReport {
 				.getIds().get(0), "members");
 
 		ArrayList<String> recruiterList = new ArrayList<>();
+		ArrayList<Integer> recruiterIdList = new ArrayList<>();
 
 		// sort and get active recruiters
 		for (int index = 0; index < recruiters.getIds().size(); index++) {
@@ -77,6 +79,7 @@ public class JobsReport {
 
 			} else {
 				recruiterList.add(recruiter.getName());
+				recruiterIdList.add(recruiter.getUserID());
 			}
 
 		}
@@ -131,7 +134,7 @@ public class JobsReport {
 							jobResults.getIds().get(index), startDate, endDate);
 					for (ApiEditHistory change : jobHistory.getEditHistories()) {
 						for (ApiEditHistoryFieldChange fieldChange : change.getFieldChanges()) {
-							if (fieldChange.getColumnName().equals("assignedUsers")) {
+							if (fieldChange.getColumnName().equals("assignments")) {
 								if (jobsList.get(count).size() == 1) {
 									jobsList.get(count).add(fieldChange.getOldValue() + fieldChange.getNewValue());
 								} else {
@@ -170,7 +173,7 @@ public class JobsReport {
 									&& jobsList.get(count).get(0).equals("")) {
 								jobsList.get(count).set(0, job.getJobOrderID());
 							}
-						} else if (fieldChange.getColumnName().equals("assignedUsers")) {
+						} else if (fieldChange.getColumnName().equals("correlatedCustomText2")) {
 							if (count >= jobsList.size()) {
 								jobsList.add(new ArrayList<Object>());
 								jobsList.get(count).add("");
@@ -221,6 +224,7 @@ public class JobsReport {
 
 		System.out.println(jobsList);
 		System.out.println(jobsList.size());
+		int recruiterCount = 0;
 
 		// go through recruiters
 		for (String recruiter : recruiterList) {
@@ -303,7 +307,7 @@ public class JobsReport {
 					NoteDto note = (NoteDto) noteResults.getDto();
 					if (note.getDateAdded().toGregorianCalendar().after(startDate.toGregorianCalendar())) {
 						noteActionList.add(note.getAction());
-						totalNoteActionList.add(note.getAction());
+						//totalNoteActionList.add(note.getAction());
 
 					}
 
@@ -315,11 +319,11 @@ public class JobsReport {
 					AppointmentDto interview = (AppointmentDto) interviewResults.getDto();
 					if (interview.getDateAdded().toGregorianCalendar().after(startDate.toGregorianCalendar())) {
 						numberOfInterviews++;
-						totalNumberOfInterviews++;
+						//totalNumberOfInterviews++;
 						interviewString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Interviews:</b> "
 								+ numberOfInterviews + "</font>";
-						totalInterviewString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Interviews:</b> "
-								+ totalNumberOfInterviews + "</font>";
+						//totalInterviewString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Interviews:</b> "
+								//+ totalNumberOfInterviews + "</font>";
 					}
 				}
 				// find placements for job
@@ -329,11 +333,11 @@ public class JobsReport {
 					PlacementDto placement = (PlacementDto) placementResults.getDto();
 					if (placement.getDateAdded().toGregorianCalendar().after(startDate.toGregorianCalendar())) {
 						numberOfPlacements++;
-						totalNumberOfPlacements++;
+						//totalNumberOfPlacements++;
 						placementString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Placements:</b> "
 								+ numberOfPlacements + "</font>";
-						totalPlacementString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Placements:</b> "
-								+ totalNumberOfPlacements + "</font>";
+						//totalPlacementString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Placements:</b> "
+								//+ totalNumberOfPlacements + "</font>";
 					}
 				}
 				// find sendouts/client submissions for job
@@ -342,12 +346,17 @@ public class JobsReport {
 					ApiFindResult sendoutResults = apiService.find(session, "Sendout", assocSendout);
 					SendoutDto sendout = (SendoutDto) sendoutResults.getDto();
 					if (sendout.getDateAdded().toGregorianCalendar().after(startDate.toGregorianCalendar())) {
+						sendout.getUserID();
+						CorporateUserDto match = (CorporateUserDto) apiService.find(session, "CorporateUser", sendout.getUserID()).getDto();
+						if (match.getName().contains(recruiter)) {
 						numberOfClientSubs++;
-						totalNumberOfClientSubs++;
+						}
+						//totalNumberOfClientSubs++;
 						clientSubsString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Client Submissions:</b> "
 								+ numberOfClientSubs + "</font>";
-						totalClientSubsString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Client Submissions:</b> "
-								+ totalNumberOfClientSubs + "</font>";
+						//totalClientSubsString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Client Submissions:</b> "
+								//+ totalNumberOfClientSubs + "</font>";
+						
 					}
 
 				}
@@ -357,15 +366,20 @@ public class JobsReport {
 					ApiFindResult submissionResults = apiService.find(session, "JobSubmission", assocSubmission);
 					JobSubmissionDto submission = (JobSubmissionDto) submissionResults.getDto();
 					if (submission.getDateAdded().toGregorianCalendar().after(startDate.toGregorianCalendar())) {
+						CorporateUserDto match = (CorporateUserDto) apiService.find(session, "CorporateUser", submission.getSendingUserID()).getDto();
+						if (match.getName().contains(recruiter)) {
 						numberOfInternalSubs++;
-						totalNumberOfInternalSubs++;
+						}
+						//totalNumberOfInternalSubs++;
 						intSubsString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Internal Submissions:</b> "
 								+ numberOfInternalSubs + "</font>";
-						totalIntSubsString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Internal Submissions:</b> "
-								+ totalNumberOfInternalSubs + "</font>";
+						//totalIntSubsString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Internal Submissions:</b> "
+								//+ totalNumberOfInternalSubs + "</font>";
 					}
 
 				}
+				
+				
 				// find number of type for each note action
 				Set<String> uniqueSet = new HashSet<String>(noteActionList);
 				for (String temp : uniqueSet) {
@@ -416,12 +430,102 @@ public class JobsReport {
 				System.out.println(compiledText);
 
 			}
+			ApiGetEntityNotesResult totNotesIds = apiService.getEntityNotesWhere(session, "CorporateUser", recruiterIdList.get(recruiterCount) , "dateAdded>" + "'" + startDate.getMonth() + "/" +
+			startDate.getDay() + "/" + startDate.getYear() + " " + (startDate.getHour()+12) + ":" + startDate.getMinute() + ":" + startDate.getMillisecond() + " AM'");
+			session = totNotesIds.getSession();
+			for (Object id: totNotesIds.getIds()) {
+				ApiFindResult findNote = apiService.find(session, "Notes", id);
+				NoteDto totNote = (NoteDto) findNote.getDto();
+				if (totNote.getCommentingPersonID().equals((recruiterIdList).get(recruiterCount))) {
+					totalNoteActionList.add(totNote.getAction());
+				}
+				
+			}
+			
+			DtoQuery sendoutQuery = new DtoQuery();
+			sendoutQuery.setEntityName("Sendout");
+			sendoutQuery.setMaxResults(10000);
+			sendoutQuery.setWhere( "dateAdded>" + "'" + startDate.getMonth() + "/" +
+			startDate.getDay() + "/" + startDate.getYear() + " " + (startDate.getHour()+12) + ":" + startDate.getMinute() + ":" + startDate.getMillisecond() + " AM'");
+			ApiQueryResult sendoutResult = apiService.query(session, sendoutQuery);
+			session = sendoutResult.getSession();
+			for(Object sendoutId:sendoutResult.getIds()) {
+				SendoutDto sendout = (SendoutDto) apiService.find(session, "Sendout", sendoutId).getDto();
+				ApiGetAssociationIdsResult associations = apiService.getAssociationIds(session, "JobOrder", sendout.getJobOrderID(), "submissions");
+				for (Object submissionId: associations.getIds()) {
+					JobSubmissionDto intSubmission = (JobSubmissionDto) apiService.find(session, "JobSubmission", submissionId).getDto();
+					if (intSubmission.getCandidateID().equals(sendout.getCandidateID())) {
+						if (intSubmission.getSendingUserID().equals(recruiterIdList.get(recruiterCount))) {
+							totalNumberOfClientSubs++;
+						}
+					}
+				}
+			}
+			
+			DtoQuery appointmentQuery = new DtoQuery();
+			appointmentQuery.setEntityName("Appointment");
+			appointmentQuery.setMaxResults(10000);
+			appointmentQuery.setWhere("dateAdded>" + "'" + startDate.getMonth() + "/" +
+			startDate.getDay() + "/" + startDate.getYear() + " " + (startDate.getHour()+12) + ":" + startDate.getMinute() + ":" + startDate.getMillisecond() + " AM'" +
+					" AND " + "type='Interview'");
+			ApiQueryResult interviewResult = apiService.query(session, appointmentQuery);
+			session = interviewResult.getSession();
+			for (Object interviewId: interviewResult.getIds()) {
+				AppointmentDto interview = (AppointmentDto) apiService.find(session, "Appointment", interviewId).getDto();
+				ApiGetAssociationIdsResult associations = apiService.getAssociationIds(session, "JobOrder", interview.getJobOrderID(), "interviews");
+				for (Object submissionId: associations.getIds()) {
+					JobSubmissionDto intSubmission = (JobSubmissionDto) apiService.find(session, "JobSubmission", submissionId).getDto();
+					if (intSubmission.getCandidateID().equals(interview.getCandidateReferenceID())) {
+						if (intSubmission.getSendingUserID().equals(recruiterIdList.get(recruiterCount))) {
+							totalNumberOfInterviews++;
+						}
+					}
+				}
+			}
+			
+			DtoQuery placementQuery = new DtoQuery();
+			placementQuery.setEntityName("Placement");
+			placementQuery.setMaxResults(10000);
+			placementQuery.setWhere("dateAdded>" + "'" + startDate.getMonth() + "/" +
+			startDate.getDay() + "/" + startDate.getYear() + " " + (startDate.getHour()+12) + ":" + startDate.getMinute() + ":" + startDate.getMillisecond() + " AM'");
+			ApiQueryResult placementResult = apiService.query(session, placementQuery);
+			session = placementResult.getSession();
+			for (Object placementId: placementResult.getIds()) {
+				PlacementDto placement = (PlacementDto) apiService.find(session, "Placement", placementId).getDto();
+				
+				ApiGetAssociationIdsResult associations = apiService.getAssociationIds(session, "JobOrder", placement.getJobOrderID(), "placements");
+				for (Object submissionId:associations.getIds()) {
+					JobSubmissionDto intSubmission = (JobSubmissionDto) apiService.find(session, "JobSubmission", submissionId).getDto();
+					if (intSubmission.getCandidateID().equals(placement.getCandidateID())) {
+						if (intSubmission.getSendingUserID().equals(recruiterIdList.get(recruiterCount))) {
+							totalNumberOfPlacements++;
+						}
+					}
+				}
+			}
+			
+			DtoQuery intSubmissionQuery = new DtoQuery();
+			intSubmissionQuery.setEntityName("JobSubmission");
+			intSubmissionQuery.setMaxResults(10000);
+			intSubmissionQuery.setWhere("dateAdded>" + "'" + startDate.getMonth() + "/" +
+			startDate.getDay() + "/" + startDate.getYear() + " " + (startDate.getHour()+12) + ":" + startDate.getMinute() + ":" + startDate.getMillisecond() + " AM'");
+			ApiQueryResult intSubmissionResult = apiService.query(session, intSubmissionQuery);
+			session = intSubmissionResult.getSession();
+			for (Object intSubmissionId: intSubmissionResult.getIds()) {
+				JobSubmissionDto internalSubmission = (JobSubmissionDto) apiService.find(session, "JobSubmission", intSubmissionId).getDto();
+				if (internalSubmission.getSendingUserID().equals(recruiterIdList.get(recruiterCount))) {
+					totalNumberOfInternalSubs++;
+				}
+			}
 			compiledText += "<br><br>";
+			
+			
+			recruiterCount++;
 		}
 
 		// Prep for email message
-		final String username = "declan.ayres@314ecorp.com";
-		final String password = "declan123";
+		final String username = "bullhorn@314ecorp.com";
+		final String password = "Kaiser123";
 
 		Properties props = new Properties();
 		props.put("mail.smtp.starttls.enable", "true");

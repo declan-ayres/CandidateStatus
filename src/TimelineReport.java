@@ -66,6 +66,7 @@ class TimelineReport {
 		
 		
 		ArrayList<String> recruiterList = new ArrayList<>();
+		ArrayList<Integer> recruiterIdList = new ArrayList<>();
 		
 		//sort and get active recruiters
 		for (int index=0; index<recruiters.getIds().size(); index++) {
@@ -75,6 +76,7 @@ class TimelineReport {
 				
 			} else {
 				recruiterList.add(recruiter.getName());
+				recruiterIdList.add(recruiter.getUserID());
 			}
 				
 			
@@ -254,6 +256,29 @@ class TimelineReport {
 					int totalNumberOfInternalSubs = 0;
 					int totalNumberOfClientSubs = 0;
 					int totalNumberOfInterviews = 0;
+					
+					for (List<Object> pair: jobsList) {
+						List<String> noteActionList = new ArrayList<String>();
+						noteString = "";
+						text = "";
+						intSubsString = "";
+						clientSubsString = "";
+						interviewString = "";
+						placementString = "";
+						statusString = "";
+						openClosedString = "";
+						recruiterString = "";
+						titleString = "";
+						int numberOfPlacements = 0;
+						int numberOfInternalSubs = 0;
+						int numberOfClientSubs = 0;
+						int numberOfInterviews = 0;
+
+						if (!(pair.get(0).equals(""))) {
+							
+							
+						}
+					}
 				}
 
 		 

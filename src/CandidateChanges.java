@@ -93,8 +93,8 @@ public class CandidateChanges {
 		CandidateDto candidate = (CandidateDto) candidateResults.getDto();
 
 		// Prep for email message
-		final String username = "declan.ayres@314ecorp.com";
-		final String password = "declan123";
+		final String username = "bullhorn@314ecorp.com";
+		final String password = "Kaiser123";
 
 		Properties props = new Properties();
 		props.put("mail.smtp.starttls.enable", "true");
@@ -115,7 +115,7 @@ public class CandidateChanges {
 
 		String temp = "";
 
-		compiledChanges += "\n\n" + temp;
+		compiledChanges += temp;
 
 		XMLGregorianCalendar da;
 
@@ -213,7 +213,7 @@ public class CandidateChanges {
 
 						date = new DateTime(year, month, day, hour, minute, 0);
 
-						if (date.isAfter(currDate.minusDays(17).getMillis())) {
+						if (date.isAfter(currDate.minusDays(7).getMillis())) {
 
 							ApiFindResult userResult = apiService.find(session,
 									"CorporateUser", histObjects.get(i)
@@ -352,8 +352,10 @@ public class CandidateChanges {
 			message.setSubject(properties.getProperty("subject"));
 			message.setText(compiledChanges);
 			message.setContent(compiledChanges, "text/html; charset=utf-8");
-
+			
+			if (!compiledChanges.equals("")) {
 			Transport.send(message);
+			}
 
 			System.out.println("Done");
 
