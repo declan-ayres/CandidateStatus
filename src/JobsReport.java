@@ -417,8 +417,9 @@ public class JobsReport {
 				System.out.println(compiledText);
 
 			}
-			ApiGetEntityNotesResult totNotesIds = apiService.getEntityNotesWhere(session, "CorporateUser", recruiterIdList.get(recruiterCount) , "dateAdded>" + "'" + String.valueOf(startDate.getMonth()) + "/" +
-			String.valueOf(startDate.getDay()) + "/" + String.valueOf(startDate.getYear()) + " 12:00:00 AM'");
+			String queryDate = String.valueOf(startDate.getMonth()) + "/" + String.valueOf(startDate.getDay()) + "/" + String.valueOf(startDate.getYear());
+			System.out.println(queryDate);
+			ApiGetEntityNotesResult totNotesIds = apiService.getEntityNotesWhere(session, "CorporateUser", recruiterIdList.get(recruiterCount) , "note.dateAdded>=" + "'" + queryDate + "'");
 			session = totNotesIds.getSession();
 			for (Object id: totNotesIds.getIds()) {
 				ApiFindResult findNote = apiService.find(session, "Notes", id);
@@ -432,84 +433,91 @@ public class JobsReport {
 			DtoQuery sendoutQuery = new DtoQuery();
 			sendoutQuery.setEntityName("Sendout");
 			sendoutQuery.setMaxResults(10000);
-			sendoutQuery.setWhere( "dateAdded>" + "'" + String.valueOf(startDate.getMonth()) + "/" +
-					String.valueOf(startDate.getDay()) + "/" + String.valueOf(startDate.getYear()) + " 12:00:00 AM'");
+			sendoutQuery.setWhere( "dateAdded>=" + "'" + queryDate + "'");
 			ApiQueryResult sendoutResult = apiService.query(session, sendoutQuery);
 			session = sendoutResult.getSession();
 			for(Object sendoutId:sendoutResult.getIds()) {
 				SendoutDto sendout = (SendoutDto) apiService.find(session, "Sendout", sendoutId).getDto();
 				ApiGetAssociationIdsResult associations = apiService.getAssociationIds(session, "JobOrder", sendout.getJobOrderID(), "submissions");
-				for (Object submissionId: associations.getIds()) {
-					JobSubmissionDto intSubmission = (JobSubmissionDto) apiService.find(session, "JobSubmission", submissionId).getDto();
-					if (intSubmission.getCandidateID().equals(sendout.getCandidateID())) {
-						if (intSubmission.getSendingUserID().equals(recruiterIdList.get(recruiterCount))) {
-							totalNumberOfClientSubs++;
-							totalClientSubsString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Client Submissions:</b> "
-									+ totalNumberOfClientSubs + "</font>";
+				if (associations.getIds().size()>=1) {
+					for (Object submissionId: associations.getIds()) {
+						JobSubmissionDto intSubmission = (JobSubmissionDto) apiService.find(session, "JobSubmission", submissionId).getDto();
+						if (intSubmission.getCandidateID().equals(sendout.getCandidateID())) {
+							if (intSubmission.getSendingUserID().equals(recruiterIdList.get(recruiterCount))) {
+								totalNumberOfClientSubs++;
+								totalClientSubsString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Client Submissions:</b> "
+										+ totalNumberOfClientSubs + "</font>";
+								}
+							}
 						}
 					}
 				}
-			}
 			
 			
 			DtoQuery appointmentQuery = new DtoQuery();
 			appointmentQuery.setEntityName("Appointment");
 			appointmentQuery.setMaxResults(10000);
-			appointmentQuery.setWhere("dateAdded>" + "'" + String.valueOf(startDate.getMonth()) + "/" +
-					String.valueOf(startDate.getDay()) + "/" + String.valueOf(startDate.getYear()) + " 12:00:00 AM'" +
+			appointmentQuery.setWhere("dateAdded>=" + "'" + queryDate + "'" +
 					" AND " + "type='Interview'");
 			ApiQueryResult interviewResult = apiService.query(session, appointmentQuery);
 			session = interviewResult.getSession();
 			for (Object interviewId: interviewResult.getIds()) {
 				AppointmentDto interview = (AppointmentDto) apiService.find(session, "Appointment", interviewId).getDto();
-				ApiGetAssociationIdsResult associations = apiService.getAssociationIds(session, "JobOrder", interview.getJobOrderID(), "interviews");
-				for (Object submissionId: associations.getIds()) {
-					JobSubmissionDto intSubmission = (JobSubmissionDto) apiService.find(session, "JobSubmission", submissionId).getDto();
-					if (intSubmission.getCandidateID().equals(interview.getCandidateReferenceID())) {
-						if (intSubmission.getSendingUserID().equals(recruiterIdList.get(recruiterCount))) {
-							totalNumberOfInterviews++;
-							totalInterviewString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Interviews:</b> "
-									+ totalNumberOfInterviews + "</font>";
+				ApiGetAssociationIdsResult associations = apiService.getAssociationIds(session, "JobOrder", interview.getJobOrderID(), "submissions");
+				System.out.println(interview.getJobOrderID());
+				if (associations.getIds().size()>=1) {
+					for (Object submissionId: associations.getIds()) {
+						JobSubmissionDto intSubmission = (JobSubmissionDto) apiService.find(session, "JobSubmission", submissionId).getDto();
+						if (intSubmission.getCandidateID()!=null && interview.getCandidateReferenceID()!=null) {
+							if (intSubmission.getCandidateID().equals(interview.getCandidateReferenceID())) {
+								if (intSubmission.getSendingUserID().equals(recruiterIdList.get(recruiterCount))) {
+									totalNumberOfInterviews++;
+									totalInterviewString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Interviews:</b> "
+											+ totalNumberOfInterviews + "</font>";
+										}
+									}
+								}
+							}
 						}
 					}
-				}
-			}
-			
+				
 			
 			DtoQuery placementQuery = new DtoQuery();
 			placementQuery.setEntityName("Placement");
 			placementQuery.setMaxResults(10000);
-			placementQuery.setWhere("dateAdded>" + "'" + String.valueOf(startDate.getMonth()) + "/" +
-					String.valueOf(startDate.getDay()) + "/" + String.valueOf(startDate.getYear()) + " 12:00:00 AM'");
+			placementQuery.setWhere("dateAdded>=" + "'" + queryDate + "'");
 			ApiQueryResult placementResult = apiService.query(session, placementQuery);
 			session = placementResult.getSession();
-			for (Object placementId: placementResult.getIds()) {
-				PlacementDto placement = (PlacementDto) apiService.find(session, "Placement", placementId).getDto();
-				if (placement.getCorrelatedCustomText2().contains(recruiter)) {
-					totalNumberOfPlacements++;
-					totalPlacementString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Placements:</b> "
-							+ totalNumberOfPlacements + "</font>";
+			if (placementResult.getIds().size()>=1) {
+				for (Object placementId: placementResult.getIds()) {
+					PlacementDto placement = (PlacementDto) apiService.find(session, "Placement", placementId).getDto();
+					if (placement.getCorrelatedCustomText2().contains(recruiter)) {
+						totalNumberOfPlacements++;
+						totalPlacementString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Placements:</b> "
+								+ totalNumberOfPlacements + "</font>";
+						}
+					}
 				}
-			}
 			
 			
 			
 			DtoQuery intSubmissionQuery = new DtoQuery();
 			intSubmissionQuery.setEntityName("JobSubmission");
 			intSubmissionQuery.setMaxResults(10000);
-			intSubmissionQuery.setWhere("dateAdded>" + "'" + String.valueOf(startDate.getMonth()) + "/" +
-					String.valueOf(startDate.getDay()) + "/" + String.valueOf(startDate.getYear()) + " 12:00:00 AM'");
+			intSubmissionQuery.setWhere("dateAdded>=" + "'" + queryDate + "'");
 			ApiQueryResult intSubmissionResult = apiService.query(session, intSubmissionQuery);
 			session = intSubmissionResult.getSession();
-			for (Object intSubmissionId: intSubmissionResult.getIds()) {
-				JobSubmissionDto internalSubmission = (JobSubmissionDto) apiService.find(session, "JobSubmission", intSubmissionId).getDto();
-				if (internalSubmission.getSendingUserID().equals(recruiterIdList.get(recruiterCount))) {
-					totalNumberOfInternalSubs++;
-					totalIntSubsString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Internal Submissions:</b> "
-							+ totalNumberOfInternalSubs + "</font>";
+			if (intSubmissionResult.getIds().size()>=1) {
+				for (Object intSubmissionId: intSubmissionResult.getIds()) {
+					JobSubmissionDto internalSubmission = (JobSubmissionDto) apiService.find(session, "JobSubmission", intSubmissionId).getDto();
+					if (internalSubmission.getSendingUserID().equals(recruiterIdList.get(recruiterCount))) {
+						totalNumberOfInternalSubs++;
+						totalIntSubsString = "	<br><font color=#48c3b1 face=Helvetica, Arial, sans-serif style='font-family:arial,sans-serif;font-size:13px'><b>Internal Submissions:</b> "
+								+ totalNumberOfInternalSubs + "</font>";
+						}
+					}
 				}
-			}
-			
+				
 			
 			Set<String>uniqueSet = new HashSet<String>(totalNoteActionList);
 			for (String temp : uniqueSet) {
