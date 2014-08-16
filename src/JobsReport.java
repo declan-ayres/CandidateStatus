@@ -306,7 +306,9 @@ public class JobsReport {
 					ApiFindResult noteResults = apiService.find(session, "Note", assocNote);
 					NoteDto note = (NoteDto) noteResults.getDto();
 					if (note.getDateAdded().toGregorianCalendar().after(startDate.toGregorianCalendar())) {
+						if (note.getCommentingPersonID().equals(recruiterIdList.get(recruiterCount))) {
 						noteActionList.add(note.getAction());
+						}
 						//totalNoteActionList.add(note.getAction());
 
 					}
@@ -408,12 +410,13 @@ public class JobsReport {
 						+ intSubsString + clientSubsString + interviewString + placementString + "</blockquote>";
 				// if it is the last job in the list then compile the jobs
 				// information into totals
+				compiledText += text;
 				if (assocList.indexOf(job) == (assocList.size() - 1)) {
-
+					text="";
 					
 				} 
 
-				compiledText += text;
+				
 				System.out.println(compiledText);
 
 			}
@@ -422,9 +425,9 @@ public class JobsReport {
 			ApiGetEntityNotesResult totNotesIds = apiService.getEntityNotesWhere(session, "CorporateUser", recruiterIdList.get(recruiterCount) , "note.dateAdded>=" + "'" + queryDate + "'");
 			session = totNotesIds.getSession();
 			for (Object id: totNotesIds.getIds()) {
-				ApiFindResult findNote = apiService.find(session, "Notes", id);
+				ApiFindResult findNote = apiService.find(session, "Note", id);
 				NoteDto totNote = (NoteDto) findNote.getDto();
-				if (totNote.getCommentingPersonID().equals((recruiterIdList).get(recruiterCount))) {
+				if (totNote.getCommentingPersonID().equals(recruiterIdList.get(recruiterCount))) {
 					totalNoteActionList.add(totNote.getAction());
 				}
 				
