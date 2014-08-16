@@ -195,6 +195,7 @@ public class JobsReport {
 					}
 				}
 			}
+			
 
 		}
 
@@ -422,9 +423,15 @@ public class JobsReport {
 			}
 			String queryDate = String.valueOf(startDate.getMonth()) + "/" + String.valueOf(startDate.getDay()) + "/" + String.valueOf(startDate.getYear());
 			System.out.println(queryDate);
-			ApiGetEntityNotesResult totNotesIds = apiService.getEntityNotesWhere(session, "CorporateUser", recruiterIdList.get(recruiterCount) , "note.dateAdded>=" + "'" + queryDate + "'");
-			session = totNotesIds.getSession();
-			for (Object id: totNotesIds.getIds()) {
+			DtoQuery noteQuery = new DtoQuery();
+			noteQuery.setEntityName("Note");
+			noteQuery.setMaxResults(1000);
+			noteQuery.setWhere("dateAdded>=" + "'" + queryDate + "'" + " AND " + "commentingPerson.id=" + String.valueOf((int) recruiterIdList.get(recruiterCount)) );
+			ApiQueryResult noteR = apiService.query(session, noteQuery);
+			
+			session = noteR.getSession();
+			System.out.println(noteR.getIds());
+			for (Object id: noteR.getIds()) {
 				ApiFindResult findNote = apiService.find(session, "Note", id);
 				NoteDto totNote = (NoteDto) findNote.getDto();
 				if (totNote.getCommentingPersonID().equals(recruiterIdList.get(recruiterCount))) {
@@ -565,7 +572,7 @@ public class JobsReport {
 
 			Message message = new MimeMessage(mailSession);
 			message.setFrom(new InternetAddress(username));
-			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("mimi.curiel@314ecorp.com"));
+			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("recruitingreports@314ecorp.com"));
 			message.setSubject("Recruiter Metrics Report for " + endDate.getMonth() + "/" + endDate.getDay() + "/"
 					+ endDate.getYear());
 			message.setText(compiledText);
